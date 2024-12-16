@@ -1,8 +1,7 @@
-from ICT import app
+from ICT import app, db, bcrypt
 from flask import redirect, request,render_template,flash,url_for
 from ICT.forms import Form, Login
 from ICT.models import User
-from ICT import db
 from flask_login import login_user, current_user, logout_user, login_required
 
 #displays all the current users that have been created and added to the database
@@ -25,7 +24,8 @@ def form():
     form = Form()
     if(request.method =='POST'): #if getting a post request it means user hit the submit button
         if form.validate_on_submit():
-            user = User(username=form.username.data, password=form.password.data) #grabs data from form and creates user object
+            hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+            user = User(username=form.username.data, password=hashed_password) #grabs data from form and creates user object
             db.session.add(user)
             db.session.commit() #adds to database
             flash('You have Signed UP!!', 'success')
@@ -41,7 +41,7 @@ def login():
     if(request.method =='POST'): 
         if form.validate_on_submit():
             user = User.query.filter_by(username=form.username.data).first()
-            if user and form.password.data == user.password:
+            if user and bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user, remember=form.remember.data)
             flash('You have Logged in!!', 'success')
             return redirect(url_for('index'))

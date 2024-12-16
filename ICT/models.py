@@ -13,4 +13,4 @@ class User(db.Model, UserMixin):
     date_created = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
     def __repr__(self):
-        return f"User('{self.username}, Created on: {self.date_created})"
+        return f"User('{self.username}, Created on: {self.date_created}, Password: {self.password})"
